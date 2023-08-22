@@ -11,42 +11,43 @@ create_ae();
 function create_ae() {
 let ae_data = {
    "m2m:ae": {
-"rn": conf.ae.name,
-"api": "0.2.481.2.001.001.000111",
-"lbl": ["key1", "key2"],
-"rr": true
+    "rn": conf.ae.name,
+    "api": "0.2.481.2.001.001.000111",
+    "lbl": ["key1", "key2"],
+    "rr": true
    }
 };
 
 let ae_config = {
-   validateStatus: function (status) {
+    validateStatus: function (status) {
 // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-return status < 500;
+    return status < 500;
    },
    method: 'post',
    maxBodyLength: Infinity,
    url: 'http://' + conf.cse.host + ':' + conf.cse.port + '/' + conf.cse.name,
    headers: {
-"Accept": 'application/json',
-"X-M2M-RI": '12345',
-"X-M2M-Origin": 'S' + conf.ae.name,
-"Content-Type": 'application/json;ty=2'
+    "Accept": 'application/json',
+    "X-M2M-RI": '12345',
+    "X-M2M-Origin": 'S' + conf.ae.name,
+    "Content-Type": 'application/json;ty=2'
    },
    data: ae_data
 };
 
 axios.request(ae_config)
-   .then((res) => {
+.then((res) => {
 //console.log(res.headers['x-m2m-rsc']);
 let rsc = res.headers['x-m2m-rsc'];
+// ae가 새로 만들어지거나 이미 만들어져 있다면 cnt 생성
 if (rsc === '2001' || rsc === '4105') {
-   // console.log('create ae success ->', 'create cnt')
-   setTimeout(create_cnt, 1000);
-}
-   })
-   .catch((error) => {
-console.log(error);
-setTimeout(create_ae, 500);
+    setTimeout(create_cnt, 1000);
+    }
+})
+// error가 발생한다면 다시 ae 생성
+.catch((error) => {
+    console.log(error);
+    setTimeout(create_ae, 500);
    });
 }
 
@@ -59,9 +60,9 @@ let cnt_data = {
        }
    };
 let cnt_config = {
-validateStatus: function (status) {
-   // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-   return status < 500;
+    validateStatus: function (status) {
+    // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+    return status < 500;
 },
 method: 'post',
 maxBodyLength: Infinity,
@@ -78,16 +79,16 @@ data: cnt_data
 axios.request(cnt_config)
 .then((res) => {
    //console.log(res.headers['x-m2m-rsc']);
-   let rsc = res.headers['x-m2m-rsc'];
-   if (rsc == '5106' || rsc == '2001' || rsc == '4105') {
-// create sub
-// server bind
-server.bind(7001);
+let rsc = res.headers['x-m2m-rsc'];
+if (rsc == '5106' || rsc == '2001' || rsc == '4105') {
+    // create sub
+    // server bind
+    server.bind(7001);
    }
 })
 .catch((error) => {
-console.log(error);
-setTimeout(create_cnt, 500);
+    console.log(error);
+    setTimeout(create_cnt, 500);
 });
 }
 
